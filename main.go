@@ -10,19 +10,15 @@ import (
 
 func main() {
 	botToken, port := initialize()
-	botApi := telegram.NewApi(botToken)
 
-	handle := func(update telegram.Update) interface{} {
-		return handleUpdate(update, botApi)
-	}
-
-	listenErr := telegram.StartListen(botToken, port, handle)
+	listenErr := telegram.StartListen(botToken, port, handleUpdate)
 	if nil != listenErr {
 		log.Printf("Unable to start listen: %v\n", listenErr)
 	}
 }
 
-func handleUpdate(update telegram.Update, botApi telegram.Api) interface{} {
+func handleUpdate(update telegram.Update) interface{} {
+	log.Printf("[INFO] Update received: %v\n", update)
 	var replyMessage string
 	if update.Message.Text == "" {
 		replyMessage = "I don't understand you"
@@ -30,10 +26,12 @@ func handleUpdate(update telegram.Update, botApi telegram.Api) interface{} {
 		replyMessage = "You said: " + update.Message.Text
 	}
 
-	return telegram.ReplyMessage{
+	replyMsg := telegram.ReplyMessage{
 		ChatId: update.Message.Chat.Id,
 		Text:   replyMessage,
 	}
+	log.Printf("[INFO] Reply message: %v\n", replyMsg)
+	return replyMsg
 }
 
 func initialize() (string, int) {
